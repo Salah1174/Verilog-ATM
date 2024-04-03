@@ -1,0 +1,16 @@
+{E:/SEM 5/EDA/Project/Project 1/ATM_4/Timer.v} {1 {vlog -work work -vopt -stats=none {E:/SEM 5/EDA/Project/Project 1/ATM_4/Timer.v}
+QuestaSim-64 vlog 10.6c Compiler 2017.07 Jul 26 2017
+-- Compiling module Timer
+
+Top level modules:
+	Timer
+
+} {} {}} {E:/SEM 5/EDA/Project/Project 1/ATM_4/Atm.v} {2 {vlog -work work -vopt -stats=none {E:/SEM 5/EDA/Project/Project 1/ATM_4/Atm.v}
+QuestaSim-64 vlog 10.6c Compiler 2017.07 Jul 26 2017
+-- Compiling module atm
+** Warning: E:/SEM 5/EDA/Project/Project 1/ATM_4/Atm.v(137): (vlog-2182) 'accounts_balances' might be read before written in always_comb or always @* block.
+
+Top level modules:
+	atm
+
+} {} {}}

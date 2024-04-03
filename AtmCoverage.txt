@@ -1,0 +1,432 @@
+# =================================================================================
+# === File: Atm.v
+# =================================================================================
+# Statement Coverage:
+#     Enabled Coverage            Active      Hits    Misses % Covered
+#     ----------------            ------      ----    ------ ---------
+#     Stmts                           51        50         1      98.0
+# 
+# ================================Statement Details================================
+# 
+# Statement Coverage for file Atm.v --
+# 
+#     1                                                module atm (
+#     2                                                    clk,
+#     3                                                    rst,
+#     4                                                    card,
+#     5                                                    card_no,
+#     6                                                    password,
+#     7                                                    option,
+#     8                                                    language,
+#     9                                                    another_service,
+#     10                                                   amount,
+#     11                                                   invalid_password,
+#     12                                                   no_balance,
+#     13                                                   invalid_card,
+#     14                                                   avalaible_balance
+#     15                                               );
+#     16                                               
+#     17                                                 input wire clk, rst, card;
+#     18                                                 input wire [2:0] card_no;
+#     19                                                 input wire [3:0] password;
+#     20                                                 input wire [2:0] option;
+#     21                                                 input wire [1:0] language;
+#     22                                                 input wire [7:0] amount;
+#     23                                                 input wire another_service;
+#     24                                                 output reg [7:0] avalaible_balance;
+#     25                                                 output reg invalid_password, invalid_card, no_balance;
+#     26                                               
+#     27                                                 localparam English = 2'b00;
+#     28                                                 localparam French = 2'b01;
+#     29                                                 localparam German = 2'b10;
+#     30                                                 localparam Italy = 2'b11;
+#     31                                               
+#     32                                                 localparam default_state = 4'b0000;  //0
+#     33                                                 localparam show_language = 4'b0001;  //1
+#     34                                                 localparam request_pin = 4'b0010;  //2
+#     35                                                 localparam show_main_menu_English = 4'b0100;  //4
+#     36                                                 localparam show_balance = 4'b0111;  //7
+#     37                                                 localparam withdraw_money = 4'b1000;  //8
+#     38                                                 localparam deposit_money = 4'b1001;  //9
+#     39                                                 localparam another_service_state = 4'b101;  //10
+#     40                                                 localparam check_card = 4'b1011;  //11
+#     41                                               
+#     42                                               
+#     43                                                 reg invalid_amount_flag;
+#     44                                                 reg found;
+#     45                                                 reg [3:0] current_state;
+#     46                                                 reg [3:0] next_state;
+#     47                                                 reg [1:0] index;
+#     48                                                 reg [3:0] password_reg;
+#     49                                                 reg [7:0] amount_reg;
+#     50                                                 reg [3:0] accounts_password[9:0];
+#     51                                                 reg [7:0] accounts_balances[9:0];
+#     52                                               
+#     53                                               
+#     54                                                 initial begin
+#     55              1                          1         avalaible_balance = 8'b00000000;
+#     56              1                          1         accounts_password[0] = 4'b1111;
+#     57              1                          1         accounts_password[1] = 4'b1110;
+#     58              1                          1         accounts_password[2] = 4'b1101;
+#     59              1                          1         accounts_password[3] = 4'b1100;
+#     60              1                          1         accounts_balances[0] = 8'b00000110;
+#     61              1                          1         accounts_balances[1] = 8'b01010101;
+#     62              1                          1         accounts_balances[2] = 8'b01010101;
+#     63              1                          1         accounts_balances[3] = 8'b01010101;
+#     64                                                 end
+#     65              1                       1048       always @(posedge clk or posedge rst) begin
+#     66                                                   if (rst) begin
+#     67              1                          2           current_state <= default_state;
+#     68              1                       1046         end else current_state <= next_state;
+#     69                                                 end
+#     70                                               
+#     71              1                       2055       always @(*) begin
+#     72                                                   case (current_state)
+#     73                                                     default_state: begin
+#     74              1                        889             invalid_password = 1'b1;
+#     75              1                        889             invalid_card = 1'b1;
+#     76              1                        889             no_balance = 1'b1;
+#     77              1                        889             next_state = check_card;
+#     78                                                     end
+#     79                                               
+#     80                                                     check_card: begin
+#     81                                                       if (card) begin
+#     82                                                         if (card_no == 3'b000) begin
+#     83              1                         61                 invalid_card = 1'b0;
+#     84              1                         61                 next_state   = request_pin;
+#     85                                                         end else if (card_no == 3'b001) begin
+#     86              1                         55                 invalid_card = 1'b0;
+#     87              1                         55                 next_state   = request_pin;
+#     88                                                         end else if (card_no == 3'b010) begin
+#     89              1                         53                 invalid_card = 1'b0;
+#     90              1                         53                 next_state   = request_pin;
+#     91                                                         end else if (card_no == 3'b011) begin
+#     92              1                         63                 invalid_card = 1'b0;
+#     93              1                         63                 next_state   = request_pin;
+#     94                                                         end else begin
+#     95              1                        210                 invalid_card = 1'b1;
+#     96              1                        210                 next_state   = default_state;
+#     97                                                         end
+#     98              1                        446             end else next_state = default_state;
+#     99                                                     end
+#     100                                                    request_pin: begin
+#     101                                                      if (invalid_card == 1'b0) begin
+#     102                                                        if (password == accounts_password[card_no]) begin
+#     103             1                         18                 next_state = show_language;
+#     104             1                         18                 invalid_password = 1'b0;
+#     105                                                        end else begin
+#     106             1                        220                 next_state = default_state;
+#     107             1                        220                 invalid_password = 1'b1;
+#     108                                                        end
+#     109                                                      end else begin
+#     110             1                    ***0***               next_state = default_state;
+#     111                                                      end
+#     112                                                    end
+#     113                                                    show_language: begin
+#     114                                                      begin
+#     115                                                        if (language == English) begin
+#     116             1                          6                 next_state = show_main_menu_English;
+#     117                                                        end else begin
+#     118             1                          9                 next_state = default_state;
+#     119                                                        end
+#     120                                                      end
+#     121                                                    end
+#     122                                                    show_main_menu_English: begin
+#     123                                                      if (option == 3'b000) begin
+#     124             1                          3               next_state = show_main_menu_English;
+#     125                                                      end else if (option == 3'b001) begin
+#     126             1                          3               next_state = deposit_money;
+#     127                                                      end else if (option == 3'b010) begin
+#     128             1                          1               next_state = withdraw_money;
+#     129                                                      end else if (option == 3'b011) begin
+#     130             1                          2               next_state = show_balance;
+#     131                                                      end else begin
+#     132             1                          1               next_state = show_main_menu_English;
+#     133                                                      end
+#     134                                                    end
+#     135                                              
+#     136                                                    show_balance: begin
+#     137             1                          2             avalaible_balance = accounts_balances[card_no];
+#     138             1                          2             next_state = another_service_state;
+#     139                                                    end
+#     140                                                    deposit_money: begin
+#     141             1                          3             accounts_balances[card_no] = accounts_balances[card_no] + amount;
+#     142             1                          3             next_state = another_service_state;
+#     143                                                    end
+#     144                                                    withdraw_money: begin
+#     145             1                          2             no_balance = 1'b1;
+#     146                                                      if (amount > accounts_balances[card_no]) begin
+#     147             1                          1               no_balance = 1'b0;
+#     148                                                      end
+#     149                                              
+#     150                                                      if (no_balance == 0) begin
+#     151             1                          1               accounts_balances[card_no] = accounts_balances[card_no] - amount;
+#     152             1                          1               next_state = another_service_state;
+#     153                                                      end else begin
+#     154             1                          1               next_state = default_state;
+#     155                                                      end
+#     156                                                    end
+#     157                                                    another_service_state: begin
+#     158                                                      if (another_service) begin
+#     159             1                          2               next_state = show_main_menu_English;
+#     160                                                      end else begin
+#     161             1                          5               next_state = default_state;
+#     162                                                      end
+#     163                                                    end
+#     164                                                  endcase
+#     165                                                end
+#     166                                              
+#     167                                              
+#     168                                              
+#     169                                              endmodule
+# 
+# Branch Coverage:
+#     Enabled Coverage            Active      Hits    Misses % Covered
+#     ----------------            ------      ----    ------ ---------
+#     Branches                        36        35         1      97.2
+# 
+# ================================Branch Details================================
+# 
+# Branch Coverage for file Atm.v --
+# 
+# ------------------------------------IF Branch------------------------------------
+#     66                                      1048     Count coming in to IF
+#     66              1                          2         if (rst) begin
+#     68              1                       1046         end else current_state <= next_state;
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# ------------------------------------CASE Branch------------------------------------
+#     72                                      2055     Count coming in to CASE
+#     73              1                        889           default_state: begin
+#     80              1                        888           check_card: begin
+#     100             1                        238           request_pin: begin
+#     113             1                         15           show_language: begin
+#     122             1                         10           show_main_menu_English: begin
+#     136             1                          2           show_balance: begin
+#     140             1                          3           deposit_money: begin
+#     144             1                          2           withdraw_money: begin
+#     157             1                          7           another_service_state: begin
+#                                                1     All False Count
+# Branch totals: 10 hits of 10 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     81                                       888     Count coming in to IF
+#     81              1                        442             if (card) begin
+#     98              1                        446             end else next_state = default_state;
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     82                                       442     Count coming in to IF
+#     82              1                         61               if (card_no == 3'b000) begin
+#     85              1                         55               end else if (card_no == 3'b001) begin
+#     88              1                         53               end else if (card_no == 3'b010) begin
+#     91              1                         63               end else if (card_no == 3'b011) begin
+#     94              1                        210               end else begin
+# Branch totals: 5 hits of 5 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     101                                      238     Count coming in to IF
+#     101             1                        238             if (invalid_card == 1'b0) begin
+#     109             1                    ***0***             end else begin
+# Branch totals: 1 hit of 2 branches = 50.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     102                                      238     Count coming in to IF
+#     102             1                         18               if (password == accounts_password[card_no]) begin
+#     105             1                        220               end else begin
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     115                                       15     Count coming in to IF
+#     115             1                          6               if (language == English) begin
+#     117             1                          9               end else begin
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     123                                       10     Count coming in to IF
+#     123             1                          3             if (option == 3'b000) begin
+#     125             1                          3             end else if (option == 3'b001) begin
+#     127             1                          1             end else if (option == 3'b010) begin
+#     129             1                          2             end else if (option == 3'b011) begin
+#     131             1                          1             end else begin
+# Branch totals: 5 hits of 5 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     146                                        2     Count coming in to IF
+#     146             1                          1             if (amount > accounts_balances[card_no]) begin
+#                                                1     All False Count
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     150                                        2     Count coming in to IF
+#     150             1                          1             if (no_balance == 0) begin
+#     153             1                          1             end else begin
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# ------------------------------------IF Branch------------------------------------
+#     158                                        7     Count coming in to IF
+#     158             1                          2             if (another_service) begin
+#     160             1                          5             end else begin
+# Branch totals: 2 hits of 2 branches = 100.0%
+# 
+# 
+# Condition Coverage:
+#     Enabled Coverage            Active   Covered    Misses % Covered
+#     ----------------            ------      ----    ------ ---------
+#     FEC Condition Terms              0         0         0     100.0
+# Expression Coverage:
+#     Enabled Coverage            Active   Covered    Misses % Covered
+#     ----------------            ------      ----    ------ ---------
+#     FEC Expression Terms             0         0         0     100.0
+# FSM Coverage:
+#     Enabled Coverage            Active      Hits    Misses % Covered
+#     ----------------            ------      ----    ------ ---------
+#     FSMs                                                        86.8
+#         States                       9         9         0     100.0
+#         Transitions                 19        14         5      73.6
+# 
+# ================================FSM Details================================
+# 
+# FSM Coverage for file Atm.v --
+# 
+# FSM_ID: current_state
+#     Current State Object : current_state
+#     ----------------------
+#     State Value MapInfo :
+#     ---------------------
+# Line          State Name               Value
+# ----          ----------               -----
+#   73       default_state                   0
+#   80          check_card                  11
+#  100         request_pin                   2
+#  113       show_language                   1
+#  122show_main_menu_English                   4
+#  136        show_balance                   7
+#  144      withdraw_money                   8
+#  140       deposit_money                   9
+#  157another_service_state                   5
+#     Covered States :
+#     ----------------
+#                    State           Hit_count
+#                    -----           ---------
+#            default_state                 451
+#               check_card                 449
+#              request_pin                 123
+#            show_language                  10
+#     show_main_menu_English                   7
+#             show_balance                   1
+#           withdraw_money                   1
+#            deposit_money                   2
+#     another_service_state                   4
+#     Covered Transitions :
+#     ---------------------
+# Line            Trans_ID           Hit_count          Transition          
+# ----            --------           ---------          ----------          
+#   77                   0                 449          default_state -> check_card
+#   98                   1                 326          check_card -> default_state
+#   93                   2                 123          check_card -> request_pin
+#  110                   3                 113          request_pin -> default_state
+#  103                   4                  10          request_pin -> show_language
+#  118                   5                   6          show_language -> default_state
+#  116                   6                   4          show_language -> show_main_menu_English
+#  130                   7                   1          show_main_menu_English -> show_balance
+#  128                   8                   1          show_main_menu_English -> withdraw_money
+#  126                   9                   2          show_main_menu_English -> deposit_money
+#  138                  11                   1          show_balance -> another_service_state
+#  152                  14                   1          withdraw_money -> another_service_state
+#  142                  15                   2          deposit_money -> another_service_state
+#  161                  17                   4          another_service_state -> default_state
+#     Uncovered Transitions :
+#     -----------------------
+# Line            Trans_ID          Transition          
+# ----            --------          ----------          
+#   67                  10          show_main_menu_English -> default_state
+#   67                  12          show_balance -> default_state
+#  154                  13          withdraw_money -> default_state
+#   67                  16          deposit_money -> default_state
+#  159                  18          another_service_state -> show_main_menu_English
+# 
+# 
+#     Summary                     Active      Hits    Misses % Covered
+#     -------                     ------      ----    ------ ---------
+#         States                       9         9         0     100.0
+#         Transitions                 19        14         5      73.6
+# Toggle Coverage:
+#     Enabled Coverage            Active      Hits    Misses % Covered
+#     ----------------            ------      ----    ------ ---------
+#     Toggle Bins                    118        73        45      61.8
+# 
+# ================================Toggle Details================================
+# 
+# Toggle Coverage for File Atm.v --
+# 
+#        Line                                   Node      1H->0L      0L->1H  "Coverage"
+# --------------------------------------------------------------------------------------
+#          17                                    rst           1           0       50.00 
+#          17                                    clk           1           1      100.00 
+#          17                                   card           1           1      100.00 
+#          18                             card_no[2]           1           1      100.00 
+#          18                             card_no[1]           1           1      100.00 
+#          18                             card_no[0]           1           1      100.00 
+#          19                            password[3]           1           1      100.00 
+#          19                            password[2]           1           1      100.00 
+#          19                            password[1]           1           1      100.00 
+#          19                            password[0]           1           1      100.00 
+#          20                              option[2]           1           1      100.00 
+#          20                              option[1]           1           1      100.00 
+#          20                              option[0]           1           1      100.00 
+#          21                            language[1]           1           1      100.00 
+#          21                            language[0]           1           1      100.00 
+#          22                              amount[7]           1           1      100.00 
+#          22                              amount[6]           1           1      100.00 
+#          22                              amount[5]           1           1      100.00 
+#          22                              amount[4]           1           1      100.00 
+#          22                              amount[3]           1           1      100.00 
+#          22                              amount[2]           1           1      100.00 
+#          22                              amount[1]           1           1      100.00 
+#          22                              amount[0]           1           1      100.00 
+#          23                        another_service           1           1      100.00 
+#          24                   avalaible_balance[7]           0           0        0.00 
+#          24                   avalaible_balance[6]           0           1       50.00 
+#          24                   avalaible_balance[5]           0           0        0.00 
+#          24                   avalaible_balance[4]           0           1       50.00 
+#          24                   avalaible_balance[3]           0           1       50.00 
+#          24                   avalaible_balance[2]           0           0        0.00 
+#          24                   avalaible_balance[1]           0           0        0.00 
+#          24                   avalaible_balance[0]           0           1       50.00 
+#          25                             no_balance           1           1      100.00 
+#          25                       invalid_password           1           1      100.00 
+#          25                           invalid_card           1           1      100.00 
+#          43                    invalid_amount_flag           0           0        0.00 
+#          44                                  found           0           0        0.00 
+#          45                       current_state[3]           1           1      100.00 
+#          45                       current_state[2]           1           1      100.00 
+#          45                       current_state[1]           1           1      100.00 
+#          45                       current_state[0]           1           1      100.00 
+#          46                          next_state[3]           1           1      100.00 
+#          46                          next_state[2]           1           1      100.00 
+#          46                          next_state[1]           1           1      100.00 
+#          46                          next_state[0]           1           1      100.00 
+#          47                               index[1]           0           0        0.00 
+#          47                               index[0]           0           0        0.00 
+#          48                        password_reg[3]           0           0        0.00 
+#          48                        password_reg[2]           0           0        0.00 
+#          48                        password_reg[1]           0           0        0.00 
+#          48                        password_reg[0]           0           0        0.00 
+#          49                          amount_reg[7]           0           0        0.00 
+#          49                          amount_reg[6]           0           0        0.00 
+#          49                          amount_reg[5]           0           0        0.00 
+#          49                          amount_reg[4]           0           0        0.00 
+#          49                          amount_reg[3]           0           0        0.00 
+#          49                          amount_reg[2]           0           0        0.00 
+#          49                          amount_reg[1]           0           0        0.00 
+#          49                          amount_reg[0]           0           0        0.00 
+# 
+# Total Node Count     =         59 
+# Toggled Node Count   =         34 
+# Untoggled Node Count =         25 
+# 
+# Toggle Coverage      =       61.8% (73 of 118 bins)
+# 
+# 
+# Total Coverage By File (code coverage only, filtered view): 85.9%

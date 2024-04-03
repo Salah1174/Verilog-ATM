@@ -1,0 +1,33 @@
+Coverage Report Summary Data by file
+
+=================================================================================
+=== File: Atm.v
+=================================================================================
+    Enabled Coverage            Active      Hits    Misses % Covered
+    ----------------            ------      ----    ------ ---------
+    Stmts                           51        50         1      98.0
+    Branches                        36        35         1      97.2
+    FEC Condition Terms              0         0         0     100.0
+    FEC Expression Terms             0         0         0     100.0
+    FSMs                                                        86.8
+        States                       9         9         0     100.0
+        Transitions                 19        14         5      73.6
+    Toggle Bins                    118        73        45      61.8
+
+=================================================================================
+=== File: Atm_tb.v
+=================================================================================
+    Enabled Coverage            Active      Hits    Misses % Covered
+    ----------------            ------      ----    ------ ---------
+    Stmts                          115       115         0     100.0
+    Branches                         0         0         0     100.0
+    FEC Condition Terms              0         0         0     100.0
+    FEC Expression Terms             0         0         0     100.0
+    FSMs                                                       100.0
+        States                       0         0         0     100.0
+        Transitions                  0         0         0     100.0
+    Toggle Bins                    136        78        58      57.3
+
+
+Total Coverage By File (code coverage only, filtered view): 85.7%
+
